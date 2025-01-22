@@ -5,14 +5,14 @@
 typedef struct
 {
     char username[50];
-    char password[64]; // 256-bit hash
+    char password[64]; 
     float balance;
 } User;
 
 User users[10];
 int user_count = 0;
 
-// Simple implementation of SHA-256 hash function (not using external libraries)
+//  SHA-256 hash function 
 void sha256(const char *str, char *output)
 {
     unsigned int h0 = 0x6a09e667;
@@ -95,28 +95,24 @@ void sha256(const char *str, char *output)
     free(data);
 }
 
-// Takes input for username
 void input_username(char *username)
 {
     printf("Enter a username: ");
     scanf("%s", username);
 }
 
-// Takes input for password and hashes it
 void input_password(char *password)
 {
     printf("Enter a password: ");
     scanf("%s", password);
 }
 
-// Takes input for initial deposit amount
 void input_initial_deposit(float *initial_deposit)
 {
     printf("Enter initial deposit: ");
     scanf("%f", initial_deposit);
 }
 
-// Checks if a username already exists
 int is_username_exists(const char *username)
 {
     for (int i = 0; i < user_count; i++)
@@ -129,7 +125,6 @@ int is_username_exists(const char *username)
     return 0;
 }
 
-// Creates a new user account
 void create_account()
 {
     char username[50], password[50];
@@ -151,13 +146,13 @@ void create_account()
 
     strcpy(users[user_count].username, username);
     strcpy(users[user_count].password, hashed_password);
+    
     users[user_count].balance = initial_deposit;
     user_count++;
 
     printf("Account created successfully!\n");
 }
 
-// Displays the ATM menu options
 void display_menu()
 {
     printf("\n1. Check Balance\n");
@@ -166,23 +161,21 @@ void display_menu()
     printf("4. Logout\n");
 }
 
-// Checks and displays the balance of the current user
 void perform_balance_check(int user_index)
 {
     printf("Your current balance is: %.2f\n", users[user_index].balance);
 }
 
-// Deposits a specified amount to the current user's account
 void perform_deposit(int user_index)
 {
     float amount;
     printf("Enter amount to deposit: ");
+
     scanf("%f", &amount);
     users[user_index].balance += amount;
     printf("Deposit successful!\n");
 }
 
-// Withdraws a specified amount from the current user's account
 void perform_withdrawal(int user_index)
 {
     float amount;
@@ -199,7 +192,6 @@ void perform_withdrawal(int user_index)
     }
 }
 
-// Handles ATM operations for a logged-in user
 void atm_operations(int user_index)
 {
     int choice;
@@ -228,16 +220,15 @@ void atm_operations(int user_index)
     }
 }
 
-// Takes login details (username and password) and hashes the password
 void input_login_details(char *username, char *password)
 {
+
     printf("Enter your username: ");
     scanf("%s", username);
     printf("Enter your password: ");
     scanf("%s", password);
 }
 
-// Logs in a user by verifying credentials
 void login()
 {
     char username[50], password[50];
@@ -267,7 +258,6 @@ void login()
     printf("User not found. Please create an account first.\n");
 }
 
-// Displays the main menu of the ATM system
 void display_main_menu()
 {
     printf("\n--- ATM System ---\n");
@@ -276,7 +266,6 @@ void display_main_menu()
     printf("3. Exit\n");
 }
 
-// Handles the main menu interactions
 void main_menu()
 {
     int option;
@@ -302,7 +291,7 @@ void main_menu()
     }
 }
 
-// Main Function
+
 int main()
 {
     main_menu();
