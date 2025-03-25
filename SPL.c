@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdint.h>
+#include <windows.h>
 
 #define FILE_NAME "users.txt"
 #define TRANSACTION_FILE "transaction_history.txt"
@@ -42,7 +43,6 @@ void sha256_hash(const char *input, char output[65])
     }
     output[64] = '\0';
 }
-
 
 void generate_rsa_keys(long long *n, long long *e, long long *d)
 {
@@ -179,6 +179,7 @@ void display_menu()
     printf("2. Deposit\n");
     printf("3. Withdraw\n");
     printf("4. Logout\n");
+    printf("5. Transfer Money\n");
 }
 
 void perform_balance_check(int user_index)
@@ -215,6 +216,58 @@ void perform_withdrawal(int user_index)
     }
 }
 
+void perform_money_transfer(int sender_index)
+{
+    char receiver_username[50];
+    float amount;
+    printf("Enter recipient's username: ");
+    scanf("%49s", receiver_username);
+
+    int receiver_index = -1;
+    for (int i = 0; i < user_count; i++)
+    {
+        if (strcmp(users[i].username, receiver_username) == 0)
+        {
+            receiver_index = i;
+            break;
+        }
+    }
+
+    if (receiver_index == -1)
+    {
+        printf("Recipient not found!\n");
+        return;
+    }
+
+    printf("Enter amount to transfer: ");
+    scanf("%f", &amount);
+
+    if (amount <= 0)
+    {
+        printf("Invalid amount!\n");
+        return;
+    }
+
+    if (amount > users[sender_index].balance)
+    {
+        printf("Insufficient balance!\n");
+        return;
+    }
+
+    // Perform Transfer
+    users[sender_index].balance -= amount;
+    users[receiver_index].balance += amount;
+
+    // Save updated balances
+    save_users_to_file();
+
+    // Log transaction
+    log_transaction(sender_index, "Transfer Sent", amount);
+    log_transaction(receiver_index, "Transfer Received", amount);
+
+    printf("Successfully transferred %.2f to %s!\n", amount, receiver_username);
+}
+
 void atm_operations(int user_index)
 {
     int choice;
@@ -236,6 +289,8 @@ void atm_operations(int user_index)
             break;
         case 4:
             printf("Logging out...\n");
+        case 5:
+            perform_money_transfer(user_index);
             return;
         default:
             printf("Invalid choice. Try again.\n");
@@ -373,6 +428,42 @@ void sha256(const char *input, char output[65])
         sprintf(output + (i * 8), "%08x", h[i]);
     }
     output[64] = '\0';
+}
+
+int shared_resource = 0;
+
+DWORD WINAPI increment(LPVOID param)
+{
+    for (int i = 0; i < 1000000; i++)
+    {
+        shared_resource++;
+    }
+    return 0;
+}
+
+DWORD WINAPI decrement(LPVOID param)
+{
+    for (int i = 0; i < 1000000; i++)
+    {
+        shared_resource--;
+    }
+    return 0;
+}
+
+void simulate_race_condition()
+{
+    HANDLE thread1, thread2;
+
+    thread1 = CreateThread(NULL, 0, increment, NULL, 0, NULL);
+    thread2 = CreateThread(NULL, 0, decrement, NULL, 0, NULL);
+
+    WaitForSingleObject(thread1, INFINITE);
+    WaitForSingleObject(thread2, INFINITE);
+
+    CloseHandle(thread1);
+    CloseHandle(thread2);
+
+    printf("Final Value of Shared Resource: %d\n", shared_resource);
 }
 
 void display_main_menu()
